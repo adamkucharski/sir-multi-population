@@ -7,54 +7,56 @@
 
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-# Output simulated deterministic epidemic
-Run_simulation<-function(dt, theta, theta_init,time.vals){
-  
-  # Define simulation model ODEs
-  simulate_deterministic <- function(theta, init.state, times) {
-    SIR_ode <- function(time, state, theta) {
-      
-      ## define variables
-      S <- state[["s_init"]]
-      I <- state[["i1_init"]]
-      R <- state[["r_init"]]
-      C <-state[["c_init"]]
-      
-      S2 <- state[["s2_init"]]
-      I2 <- state[["i2_init"]]
-      R2 <- state[["r2_init"]]
-      C2 <-state[["c2_init"]]
-      
-      N1 <- theta[["npop1"]]
-      N2 <- theta[["npop2"]]
-      
-      ## extract parameters
-      alpha <- theta[["alpha"]]
-      beta <- theta[["beta"]]
-      gamma <- theta[["gamma"]]
-      repR <- theta[["rep"]]
-      
-      foi1 <- beta*(I+alpha*I2)/N1
-      foi2 <- beta*(I2+alpha*I)/N2
-      
-      # Define transition equations
-      dS <- -S*foi1
-      dI <- S*foi1-gamma*I
-      dR <- gamma*I
-      dC <- repR*S*foi1
-      
-      dS2 <- -S2*foi2
-      dI2 <- S2*foi2-gamma*I2
-      dR2 <- gamma*I2
-      dC2 <- repR*S2*foi2
-      
-      return(list(c(dS,dI,dR,dC,dS2,dI2,dR2,dC2)))
-    }
+# Define simulation model ODEs
+simulate_deterministic <- function(theta, init.state, times) {
+  SIR_ode <- function(time, state, theta) {
     
-    traj <- as.data.frame(ode(init.state, times, SIR_ode, theta, method = "ode45"))
-    return(traj)
+    ## define variables
+    S <- state[["s_init"]]
+    I <- state[["i1_init"]]
+    R <- state[["r_init"]]
+    C <-state[["c_init"]]
+    
+    S2 <- state[["s2_init"]]
+    I2 <- state[["i2_init"]]
+    R2 <- state[["r2_init"]]
+    C2 <-state[["c2_init"]]
+    
+    N1 <- theta[["npop1"]]
+    N2 <- theta[["npop2"]]
+    
+    ## extract parameters
+    alpha <- theta[["alpha"]]
+    beta <- theta[["beta"]]
+    gamma <- theta[["gamma"]]
+    repR <- theta[["rep"]]
+    
+    foi1 <- beta*(I+alpha*I2)/N1
+    foi2 <- beta*(I2+alpha*I)/N2
+    
+    # Define transition equations
+    dS <- -S*foi1
+    dI <- S*foi1-gamma*I
+    dR <- gamma*I
+    dC <- S*foi1
+    
+    dS2 <- -S2*foi2
+    dI2 <- S2*foi2-gamma*I2
+    dR2 <- gamma*I2
+    dC2 <- S2*foi2
+    
+    return(list(c(dS,dI,dR,dC,dS2,dI2,dR2,dC2)))
   }
   
+  traj <- as.data.frame(ode(init.state, times, SIR_ode, theta, method = "ode45"))
+  return(traj)
+}
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# Output simulated deterministic epidemic
+run_simulation <- function(dt, theta, theta_init,time.vals){
+
   # Read in initial conditions
   init1 <- c(s_init=theta_init[["s_init"]],
           i1_init=theta_init[["i1_init"]],
@@ -81,4 +83,18 @@ Run_simulation<-function(dt, theta, theta_init,time.vals){
   return(list(C1_trace=casecount,C2_trace=casecount2,C2_out=cases2,S_trace=S_traj,I_trace=I_traj))
   
 }
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# Poisson observation model
+
+cases_reported <- function(case_series,theta) {
+  
+  sapply(case_series,function(x){rpois(1,lambda = theta[["rep"]]*x)})
+  
+}
+
+
+
+
 
