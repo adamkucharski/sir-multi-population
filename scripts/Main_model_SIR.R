@@ -59,14 +59,14 @@ plot(time.vals/7,output_sim$C1_trace,type="l",col='white',xlab="weeks",ylab="tot
 lines(time.vals/7, output_sim$C1_trace ,col='blue') # population 1
 lines(time.vals/7, output_sim$C2_trace,col='red') # population 2
 lines(time.vals/7, output_sim$C3_trace,col='dark green') # population 3
-lines(time.vals/7, output_sim$C1_trace + output_sim$C2_trace + output_sim$C3_trace ,col='black')  # total cases
+lines(time.vals/7, output_sim$C1_trace + output_sim$C2_trace + output_sim$C3_trace ,col='black',lwd=2)  # total cases
 
 # Reported cases
 plot(time.vals/7, output_sim$C1_trace,type="l",col='white',xlab="weeks",ylab="reported cases",ylim=c(0,120))
 lines(time.vals/7, cases_reported(output_sim$C1_trace,theta) ,col='blue') # population 1
 lines(time.vals/7, cases_reported(output_sim$C2_trace,theta),col='red') # population 2
 lines(time.vals/7, cases_reported(output_sim$C3_trace,theta),col='dark green') # population 3
-lines(time.vals/7, cases_reported( output_sim$C1_trace + output_sim$C2_trace + output_sim$C3_trace,theta) ,col='black')  # total cases
+lines(time.vals/7, cases_reported( output_sim$C1_trace + output_sim$C2_trace + output_sim$C3_trace,theta) ,col='black',lwd=2)  # total cases
 
 
 # Save plots
