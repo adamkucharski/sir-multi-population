@@ -21,13 +21,13 @@ popsize1 <- 10000 # population 1 size
 popsize2 <- 8000 # population 2 size
 popsize3 <- 10000 # population 2 size
 dt <- 1  # time increment for simulation output (days)
-time.vals <- seq(0,300,7) # time intervals
+time.vals <- seq(0,450,7) # time intervals
 
-r0 <- 1.5 # basic reproduction number
+r0 <- 1.4 # basic reproduction number
   
 # Set parameter vector
 theta <- c(beta = NA,
-          gamma = 1/7, # mean duration of infectiousness
+          gamma = 1/10, # mean duration of infectiousness
           alpha1 = 0.001, # relative contact rate between populations 1-2
           alpha2 = 0.001, # relative contact rate between populations 2-3
           alpha3 = 0.000, # relative contact rate between populations 3-1
@@ -55,18 +55,18 @@ output_sim <- run_simulation(dt,theta,theta_init,time.vals)
 par(mfrow=c(2,1),mar = c(3.2,3.5,1,1),mgp=c(2.2,0.6,0),las=1)
 
 # Total cases
-plot(time.vals,output_sim$C1_trace,type="l",col='white',xlab="days",ylab="total cases",ylim=c(0,1000))
-lines(time.vals, output_sim$C1_trace ,col='blue') # population 1
-lines(time.vals, output_sim$C2_trace,col='red') # population 2
-lines(time.vals, output_sim$C3_trace,col='dark green') # population 3
-lines(time.vals, output_sim$C1_trace + output_sim$C2_trace + output_sim$C3_trace ,col='black')  # total cases
+plot(time.vals/7,output_sim$C1_trace,type="l",col='white',xlab="weeks",ylab="total cases",ylim=c(0,500))
+lines(time.vals/7, output_sim$C1_trace ,col='blue') # population 1
+lines(time.vals/7, output_sim$C2_trace,col='red') # population 2
+lines(time.vals/7, output_sim$C3_trace,col='dark green') # population 3
+lines(time.vals/7, output_sim$C1_trace + output_sim$C2_trace + output_sim$C3_trace ,col='black')  # total cases
 
 # Reported cases
-plot(time.vals, output_sim$C1_trace,type="l",col='white',xlab="days",ylab="reported cases",ylim=c(0,300))
-lines(time.vals, cases_reported(output_sim$C1_trace,theta) ,col='blue') # population 1
-lines(time.vals, cases_reported(output_sim$C2_trace,theta),col='red') # population 2
-lines(time.vals, cases_reported(output_sim$C3_trace,theta),col='dark green') # population 3
-lines(time.vals, cases_reported( output_sim$C1_trace + output_sim$C2_trace + output_sim$C3_trace,theta) ,col='black')  # total cases
+plot(time.vals/7, output_sim$C1_trace,type="l",col='white',xlab="weeks",ylab="reported cases",ylim=c(0,120))
+lines(time.vals/7, cases_reported(output_sim$C1_trace,theta) ,col='blue') # population 1
+lines(time.vals/7, cases_reported(output_sim$C2_trace,theta),col='red') # population 2
+lines(time.vals/7, cases_reported(output_sim$C3_trace,theta),col='dark green') # population 3
+lines(time.vals/7, cases_reported( output_sim$C1_trace + output_sim$C2_trace + output_sim$C3_trace,theta) ,col='black')  # total cases
 
 
 # Save plots
