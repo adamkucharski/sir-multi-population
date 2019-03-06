@@ -1,4 +1,4 @@
-# sir-two-population
+# sir-multi-population
 
 ### Summary
 
