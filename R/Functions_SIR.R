@@ -22,30 +22,47 @@ simulate_deterministic <- function(theta, init.state, times) {
     R2 <- state[["r2_init"]]
     C2 <-state[["c2_init"]]
     
+    S3 <- state[["s3_init"]]
+    I3 <- state[["i3_init"]]
+    R3 <- state[["r3_init"]]
+    C3 <- state[["c3_init"]]
+    
     N1 <- theta[["npop1"]]
     N2 <- theta[["npop2"]]
+    N3 <- theta[["npop3"]]
     
     ## extract parameters
-    alpha <- theta[["alpha"]]
+    alpha1 <- theta[["alpha1"]]
+    alpha2 <- theta[["alpha2"]]
+    alpha3 <- theta[["alpha3"]]
     beta <- theta[["beta"]]
     gamma <- theta[["gamma"]]
     repR <- theta[["rep"]]
     
-    foi1 <- beta*(I+alpha*I2)/N1
-    foi2 <- beta*(I2+alpha*I)/N2
+    foi1 <- beta*(I+alpha1*I2+alpha3*I3)/N1
+    foi2 <- beta*(I2+alpha1*I+alpha2*I3)/N2
+    foi3 <- beta*(I3+alpha2*I2+alpha3*I)/N3
     
     # Define transition equations
+    # Population 1
     dS <- -S*foi1
     dI <- S*foi1-gamma*I
     dR <- gamma*I
     dC <- S*foi1
     
+    # Population 2
     dS2 <- -S2*foi2
     dI2 <- S2*foi2-gamma*I2
     dR2 <- gamma*I2
     dC2 <- S2*foi2
     
-    return(list(c(dS,dI,dR,dC,dS2,dI2,dR2,dC2)))
+    # Population 3
+    dS3 <- -S3*foi3
+    dI3 <- S3*foi3-gamma*I3
+    dR3 <- gamma*I3
+    dC3 <- S3*foi3
+    
+    return(list(c(dS,dI,dR,dC,dS2,dI2,dR2,dC2,dS3,dI3,dR3,dC3)))
   }
   
   traj <- as.data.frame(ode(init.state, times, SIR_ode, theta, method = "ode45"))
@@ -65,7 +82,11 @@ run_simulation <- function(dt, theta, theta_init,time.vals){
           s2_init=theta_init[["s2_init"]],
           i2_init=theta_init[["i2_init"]],
           r2_init=theta_init[["r2_init"]],
-          c2_init=0)
+          c2_init=0,
+          s3_init=theta_init[["s3_init"]],
+          i3_init=theta_init[["i3_init"]],
+          r3_init=theta_init[["r3_init"]],
+          c3_init=0)
   
   # Output simulation data
   output <- simulate_deterministic(theta,init1,seq(0,max(time.vals),0.1))
@@ -79,8 +100,11 @@ run_simulation <- function(dt, theta, theta_init,time.vals){
   cases2 <- output[match(time.vals,output$time),"c2_init"]
   casecount2 <- cases2-c(0,cases2[1:(length(time.vals)-1)])
   
+  cases3 <- output[match(time.vals,output$time),"c3_init"]
+  casecount3 <- cases3-c(0,cases3[1:(length(time.vals)-1)])
+  
   # Return selected outputs
-  return(list(C1_trace=casecount,C2_trace=casecount2,C2_out=cases2,S_trace=S_traj,I_trace=I_traj))
+  return(list(C1_trace=casecount,C2_trace=casecount2,C3_trace=casecount3,C2_out=cases2,S_trace=S_traj,I_trace=I_traj))
   
 }
 
