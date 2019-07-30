@@ -39,9 +39,9 @@ simulate_deterministic <- function(theta, init.state, times) {
     gamma <- theta[["gamma"]]
     repR <- theta[["rep"]]
     
-    foi1 <- beta*(I+alpha1*I2+alpha3*I3)/N1
-    foi2 <- beta*(I2+alpha1*I+alpha2*I3)/N2
-    foi3 <- beta*(I3+alpha2*I2+alpha3*I)/N3
+    foi1 <- beta*(I/N1+alpha1*I2/N2+alpha3*I3/N1)
+    foi2 <- beta*(I2/N2+alpha1*I/N1+alpha2*I3/N2)
+    foi3 <- beta*(I3/N3+alpha2*I2/N2+alpha3*I/N1)
     
     # Define transition equations
     # Population 1
