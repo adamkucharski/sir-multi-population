@@ -1,0 +1,135 @@
+---
+title: "Implementing the Basic SIR Model"
+author: "Your Name"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Implementing the Basic SIR Model}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# Introduction
+
+This vignette provides a detailed guide on how to implement the basic SIR model using the provided R code in this repository. The SIR model is a simple mathematical model used to describe the spread of infectious diseases in a population. The model divides the population into three compartments: Susceptible (S), Infected (I), and Recovered (R).
+
+# Prerequisites
+
+Before you begin, make sure you have the following packages installed:
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r prerequisites}
+install.packages(c("deSolve", "magrittr", "tidyverse"))
+```
+
+# Loading the Required Libraries
+
+First, load the required libraries:
+
+```{r load-libraries}
+library(deSolve)
+library(magrittr)
+library(tidyverse)
+```
+
+# Setting Up the Working Directory
+
+Set up the working directory to the root of the repository:
+
+```{r set-working-directory}
+setwd("~/path/to/your/repository")
+```
+
+# Sourcing the Functions
+
+Source the SIR simulation functions from the `R/Functions_SIR.R` file:
+
+```{r source-functions}
+source("R/Functions_SIR.R")
+```
+
+# Defining Model Parameters
+
+Define the model parameters, including population sizes, time increments, and the basic reproduction number (R0):
+
+```{r define-parameters}
+popsize1 <- 10000 # population 1 size
+popsize2 <- 5000 # population 2 size
+popsize3 <- 9000 # population 3 size
+dt <- 1  # time increment for simulation output (days)
+time.vals <- seq(0,800,7) # time intervals
+
+r0 <- 1.4 # basic reproduction number
+
+# Set parameter vector
+theta <- c(beta = NA,
+          gamma = 1/10, # mean duration of infectiousness
+          alpha1 = 0.0001, # relative contact rate between populations 1-2
+          alpha2 = 0.0001, # relative contact rate between populations 2-3
+          alpha3 = 0.000, # relative contact rate between populations 3-1
+          npop1 = popsize1, # size of population 1
+          npop2 = popsize2, # size of population 2
+          npop3 = popsize3, # size of population 3
+          rep = 0.25 # proportion of cases reported
+          )
+
+theta[["beta"]] <- r0*theta[["gamma"]] # define beta as function of R0 and gamma
+```
+
+# Setting Initial Conditions
+
+Set the initial conditions for the simulation, assuming everyone is susceptible except for a few initial infections:
+
+```{r set-initial-conditions}
+initial_inf <- 1 # initially infectious in population 1
+theta_init <- c(s_init=NA,i1_init=initial_inf,r_init=0,s2_init=NA,i2_init=0,r2_init=0,s3_init=NA,i3_init=0,r3_init=0)
+theta_init[["s_init"]] <- theta[["npop1"]]-theta_init[["i1_init"]]
+theta_init[["s2_init"]] <- theta[["npop2"]]-theta_init[["i2_init"]]
+theta_init[["s3_init"]] <- theta[["npop3"]]-theta_init[["i3_init"]]
+```
+
+# Running the Simulation
+
+Run the simulation using the defined parameters and initial conditions:
+
+```{r run-simulation}
+output_sim <- run_simulation(dt,theta,theta_init,time.vals)
+```
+
+# Plotting the Results
+
+Plot the new reported cases over time for each population:
+
+```{r plot-results}
+par(mfrow=c(1,1),mar = c(3.2,3.5,1,1),mgp=c(2.2,0.6,0),las=1)
+
+# Total cases
+plot(time.vals/7,output_sim$C1_trace,type="l",col='white',xlab="weeks",ylab="total cases",ylim=c(0,500))
+lines(time.vals/7, output_sim$C1_trace ,col='blue') # population 1
+lines(time.vals/7, output_sim$C2_trace,col='red') # population 2
+lines(time.vals/7, output_sim$C3_trace,col='dark green') # population 3
+lines(time.vals/7, output_sim$C1_trace + output_sim$C2_trace + output_sim$C3_trace ,col='black',lwd=2)  # total cases
+
+# Reported cases
+plot(time.vals/7, output_sim$C1_trace,type="l",col='white',xlab="weeks",ylab="reported cases",ylim=c(0,120))
+lines(time.vals/7, cases_reported(0.8*output_sim$C1_trace,theta) ,col='blue') # population 1
+lines(time.vals/7, cases_reported(0.8*output_sim$C2_trace,theta),col='red') # population 2
+lines(time.vals/7, cases_reported(0.8*output_sim$C3_trace,theta),col='dark green') # population 3
+lines(time.vals/7, cases_reported(1.3*( output_sim$C1_trace + output_sim$C2_trace + output_sim$C3_trace),theta) ,col='black',lwd=2)  # total cases
+```
+
+# Saving the Plots
+
+Save the plots as a PDF file:
+
+```{r save-plots}
+dev.copy(pdf,paste("plots/SIR_model.pdf",sep=""),width=8,height=4)
+dev.off()
+```
+
+# Conclusion
+
+This vignette provided a step-by-step guide on how to implement the basic SIR model using the provided R code in this repository. By following these steps, you can simulate the spread of infectious diseases in a population and visualize the results.
